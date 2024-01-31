@@ -1,0 +1,19 @@
+// Libraries
+import { Meta, StoryObj } from '@storybook/react'
+// Components
+import { {{component_name}} } from './{{component_name}}'
+
+const meta: Meta<typeof {{component_name}}> = {
+  title: '{{component_name}}',
+  component: {{component_name}},
+}
+
+export default meta
+
+type Story = StoryObj<typeof {{component_name}}>
+
+export const Default: Story = {
+  args: {
+    // TODO
+  },
+}
