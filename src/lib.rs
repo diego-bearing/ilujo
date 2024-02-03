@@ -21,6 +21,7 @@ pub struct Config {
     pub current_dir: PathBuf,
     pub app_dir: String,
     pub args: Vec<String>,
+    pub debug_mode: bool,
     pub options: HashMap<String, String>,
 }
 
@@ -34,9 +35,21 @@ impl Config {
 
             format!("{home}/.ilujo")
         });
+
+        let debug_mode = env::var("ILUJO_DEBUG_MODE")
+            .map(|v| bool::from_str(&v).unwrap_or_default())
+            .unwrap_or(false);
+
         let options = Self::options();
 
-        Ok(Self{ args, app_dir, current_exe, current_dir, options })
+        Ok(Self { 
+            args, 
+            app_dir, 
+            current_exe, 
+            current_dir, 
+            debug_mode, 
+            options,
+        })
     }
 
     fn options() -> HashMap<String, String> {
@@ -111,8 +124,11 @@ impl CommandProcessor {
     }
 
     pub fn process(&self, command: Command) -> Result<(), Box<dyn error::Error>> {
-        println!("Config: {:#?}", self.config);
-        println!("Command: {:?}", command);
+
+        if self.config.debug_mode {
+            println!("Config: {:#?}", self.config);
+            println!("Command: {:?}", command);
+        }
 
         match command {
             Command::Create(target) => match target {
