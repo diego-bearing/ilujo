@@ -1,9 +1,11 @@
 
 use std::collections::HashMap;
+use std::os::unix::process::CommandExt;
 use std::str::FromStr;
 use std::{env, error, fs};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::process;
 
 pub trait CreateComponent {
     const PLACEHOLDER_NAME: &'static str;
@@ -65,6 +67,7 @@ impl From<&String> for CreateTarget {
 #[derive(Debug)]
 pub enum Command {
     Create(CreateTarget),
+    OpenAppDir,
 }
 
 impl Command {
@@ -82,6 +85,7 @@ impl Command {
                     },
                     Some(name) => Ok(Self::Create(CreateTarget::UiComponent(name.to_string())))
                 },
+                "open-dir" => Ok(Self::OpenAppDir),
                 other => {
                     println!("Command `{other}` not found");
                     std::process::exit(1);
@@ -108,6 +112,15 @@ impl CommandProcessor {
             Command::Create(target) => match target {
                 CreateTarget::UiComponent(component_name) => self.create_ui(&component_name),
             },
+            Command::OpenAppDir => {
+                let mut cmd = process::Command::new("open");
+
+                cmd.arg(format!("{}", self.config.app_dir));
+
+                cmd.exec();
+
+                Ok(())
+            }
         }
     }
 }
