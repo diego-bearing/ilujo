@@ -72,15 +72,14 @@ impl From<&String> for CreateTarget {
 pub enum Command {
     Create(CreateTarget),
     OpenAppDir,
+    Help,
 }
 
 impl Command {
     pub fn build(args: &[String]) -> Result<Self, Box<dyn error::Error>> {
         match args.get(1) {
-            None => {
-                println!("No command");
-                std::process::exit(1);
-            },
+            None => Ok(Self::Help),
+
             Some(cmd) => match cmd.as_str() {
                 "ui" => match args.get(2) {
                     None => {
@@ -90,6 +89,9 @@ impl Command {
                     Some(name) => Ok(Self::Create(CreateTarget::UiComponent(name.to_string())))
                 },
                 "open-dir" => Ok(Self::OpenAppDir),
+
+                "help" => Ok(Self::Help),
+
                 other => {
                     println!("Command `{other}` not found");
                     std::process::exit(1);
@@ -124,7 +126,12 @@ impl CommandProcessor {
                 cmd.exec();
 
                 Ok(())
-            }
+            },
+            Command::Help => {
+                print_help();
+
+                Ok(())
+            },
         }
     }
 }
@@ -203,5 +210,20 @@ impl CreateComponent for CommandProcessor {
 
 }
 
+fn print_help() {
+    println!("{}", HELP_MESSAGE);
+}
 
+const HELP_MESSAGE: &str = r#"
+    Welcome to `ilujo` (the word for toolbox in esperanto)
 
+    Commands:
+
+    ui [name]   Create a UI component boilerplate called [name] in the current directory
+                e.g. `ilujo ui HelloWorld`
+
+    app-dir     Open the app directory installation with the default window manager
+                e.g. `ilujo open-dir`
+
+    help        Show this message
+"#;

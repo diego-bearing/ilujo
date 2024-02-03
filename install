@@ -10,9 +10,19 @@ echo "You are about to install $APP_NAME, continue? (y/N)"
 read CONTINUE
 
 if [[ $CONTINUE != 'y' ]]; then
-    echo "Exiting without changes."
+    echo "Exiting without changes"
     echo
     exit 0
+fi
+
+# Check rust compiler
+if ! command -v rustc &> /dev/null
+then
+    echo "Install rust first https://www.rust-lang.org/tools/install"
+    echo
+    echo "Exiting without changes"
+    echo
+    exit 1
 fi
 
 echo "- Compiling code:"
