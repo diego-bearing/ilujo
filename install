@@ -1,0 +1,48 @@
+#! /bin/sh
+
+APP_NAME=ilujo
+DIR_SCRIPT=$(dirname $(readlink -f $0))
+DIR_TARGET=$HOME/.$APP_NAME
+DIR_BIN=$HOME/bin
+DIR_APP_BIN=target/release
+
+echo "You are about to install $APP_NAME, continue? (y/N)"
+read CONTINUE
+
+if [[ $CONTINUE != 'y' ]]; then
+    echo "Exiting without changes."
+    echo
+    exit 0
+fi
+
+echo "- Compiling code:"
+echo
+cargo build --release
+echo
+
+if [ -d $DIR_TARGET ]; then
+    echo "- Deleting existing $DIR_TARGET directory"
+    rm -rf $DIR_TARGET
+fi
+
+echo "- Creating $DIR_TARGET directory"
+mkdir -p $DIR_TARGET
+
+echo "- Copying files"
+
+cp $DIR_SCRIPT/$DIR_APP_BIN/$APP_NAME $DIR_TARGET
+
+cp -r $DIR_SCRIPT/templates $DIR_TARGET/templates
+
+mkdir -p $DIR_BIN
+
+if [ -f $DIR_BIN/$APP_NAME ]; then
+    echo "- Deleting existing link in $DIR_BIN/"
+    rm $DIR_BIN/$APP_NAME
+fi
+
+echo "- Creating link to $DIR_TARGET/$APP_NAME in $DIR_BIN/"
+ln -s $DIR_TARGET/$APP_NAME $DIR_BIN/$APP_NAME
+
+echo "Done."
+echo

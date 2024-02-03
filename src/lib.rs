@@ -29,7 +29,11 @@ impl Config {
         let args: Vec<String> = env::args().collect();
         let current_exe = env::current_exe()?;
         let current_dir = env::current_dir()?;
-        let app_dir = env::var("ILUJO_APP_DIR")?;
+        let app_dir = env::var("ILUJO_APP_DIR").unwrap_or({
+            let home = env::var("HOME").unwrap();
+
+            format!("{home}/.ilujo")
+        });
         let options = Self::options();
 
         Ok(Self{ args, app_dir, current_exe, current_dir, options })
