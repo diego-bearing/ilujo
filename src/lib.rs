@@ -1,4 +1,6 @@
 
+use std::collections::HashMap;
+use std::str::FromStr;
 use std::{env, error, fs};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -17,6 +19,7 @@ pub struct Config {
     pub current_dir: PathBuf,
     pub app_dir: String,
     pub args: Vec<String>,
+    pub options: HashMap<String, String>,
 }
 
 impl Config {
@@ -25,8 +28,26 @@ impl Config {
         let current_exe = env::current_exe()?;
         let current_dir = env::current_dir()?;
         let app_dir = env::var("ILUJO_APP_DIR")?;
+        let options = Self::options();
 
-        Ok(Self{ args, app_dir, current_exe, current_dir })
+        Ok(Self{ args, app_dir, current_exe, current_dir, options })
+    }
+
+    fn options() -> HashMap<String, String> {
+        let args = env::args();
+
+        args.filter(|arg| arg.starts_with("--"))
+            .map(move |arg| arg.split("=")
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>())
+            .filter_map(|s| {
+                match (s.get(0), s.get(1)) {
+                    (None, _) => None,
+                    (_, None) => None,
+                    (Some(key), Some(val)) => Some((String::from(key), String::from(val)))
+                }
+            })
+            .collect()
     }
 }
 
@@ -104,7 +125,10 @@ impl CreateComponent for CommandProcessor {
 
     fn create_ui(&self, component_name: &str) -> Result<(), Box<dyn error::Error>> {
         let Config {current_dir, app_dir, ..} = &self.config;
-        let target_dir = current_dir.clone();
+
+        let target_dir = self.config.options.get("--dir")
+            .map_or(current_dir.clone(), |s| PathBuf::from_str(s)
+                .expect("creating path from --dir"));
 
         let dir_entries = fs::read_dir(&target_dir).expect("should read the target dir");
 
