@@ -13,7 +13,7 @@
 - Enter the repo directory and run the install script:
 
 ```sh
-sh install
+./install # or: bash install
 ```
 
 - To have access to the executable, add the `$HOME/bin`to your `$PATH` env variable. For instance, add a like at the end of your _.zshrc_ file:

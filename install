@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 APP_NAME=ilujo
 DIR_SCRIPT=$(dirname $(readlink -f $0))
